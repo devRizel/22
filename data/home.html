@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Madridejos Cebu Barangays Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../includes/leaflet.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    a {
+      text-decoration: none;
+      color: black;
+    }
+
+    .sidebar {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: -250px;
+      background-color: #f4f4f4;
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    .sidebar a {
+      padding: 15px 20px;
+      display: block;
+      color: black;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      background-color: #ddd;
+    }
+
+    .open-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1100;
+      font-size: 24px;
+      background-color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      border-radius: 5px;
+      transition: left 0.3s, right 0.3s;
+    }
+
+    .open-btn.moved {
+      left: auto;
+      right: 15px;
+    }
+
+    .popup {
+      display: none;
+      background-color: rgba(0,0,0,0.5);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+    }
+
+    .popup-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 200px;
+    }
+
+    .popup-content p {
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .button-group button {
+      width: 150px;
+      padding: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      cursor: pointer;
+      background-color: white;
+      transition: background-color 0.2s;
+    }
+
+    .button-group button:hover {
+      background-color: #f0f0f0;
+    }
+    .leaflet-control-attribution {
+  display: none !important;
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="mySidebar" class="sidebar">
+    <center>
+      <a href="home.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="#" id="exitConfirmButton">Exit</a>
+    </center>
+  </div>
+
+  <button class="open-btn" onclick="toggleSidebar()">☰</button>
+
+  <div id="popupCloseRight" class="popup">
+    <div class="popup-content">
+      <p>Are you sure you want to Exit?</p>
+      <div class="button-group">
+        <button id="exitButton">Yes</button>
+        <button id="closePopup">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <script src="../includes/leaflet.js"></script>
+  <script>
+    // Toggle Sidebar function
+    function toggleSidebar() {
+      var sidebar = document.getElementById("mySidebar");
+      var btn = document.querySelector(".open-btn");
+
+      if (sidebar.style.left === "0px") {
+        sidebar.style.left = "-250px"; // hide the sidebar
+        btn.classList.remove("moved"); // move button back to the left
+      } else {
+        sidebar.style.left = "0px"; // show the sidebar
+        btn.classList.add("moved"); // move button to the right
+      }
+    }
+
+    // Close the sidebar if clicking outside of it
+    document.addEventListener('click', function(event) {
+      var sidebar = document.getElementById("mySidebar");
+      var btn = document.querySelector(".open-btn");
+
+      // Check if the click is outside the sidebar and the button
+      if (!sidebar.contains(event.target) && !btn.contains(event.target) && sidebar.style.left === "0px") {
+        sidebar.style.left = "-250px"; // hide the sidebar
+        btn.classList.remove("moved"); // move button back to the left
+      }
+    });
+
+    // Leaflet map setup
+    var map = L.map('map', { zoomControl: false }).setView([11.275181029449941, 123.73156931418407], 14.4);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; Mobile 2025'
+    }).addTo(map);
+
+    var arrowIcon = L.icon({
+      iconUrl: '../includes/img/OIP-removebg-preview.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    var barangays = [
+    { name: "Allyza Faye Eatery", lat: 11.2958471833296,  lng: 123.73268573313656, link: "1.html" },
+  { name: "Kuya Art’s Batchoyan", lat: 11.295711897259498,   lng: 123.73204192701526, link: "2.html" },
+  { name: "Tomgu Food and Drinks", lat: 11.29227858882775, lng: 123.73128265473753, link: "3.html" },
+  { name: "Mi Cusina", lat: 11.263455468267185,   lng: 123.72388990385356, link: "4.html" },
+  { name: "Panyang", lat: 11.26273701801364, lng: 123.72322224610497, link: "5.html" },
+  { name: "Alzyair Menu", lat: 11.262959889598239, lng: 123.72356049762575, link: "6.html" },
+  { name: "Benny's Resto Bar", lat: 11.295802663278014, lng: 123.73078458499994, link: "7.html" },
+  { name: "Master Lugaw", lat: 11.263264522683519,  lng: 123.7238434424347, link: "8.html" },
+  { name: "Diaz Eatry", lat: 11.263602535215021, lng: 123.72416776738915, link: "9.html" },
+  { name: "ATHENA'S EATERY", lat: 11.295423286763366,  lng: 123.73013350172701, link: "10.html" },
+  { name: "Chef Lechon Manok", lat: 11.293368193216185, lng: 123.7311661052266, link: "11.html" },
+  { name: "Goske Restaurant", lat: 11.291725192398888, lng: 123.73169218499807, link: "12.html" },
+  { name: "THE PATIO", lat: 11.289861223717438, lng: 123.72319205956676, link: "13.html" },
+  { name: "Inday Eatery", lat: 11.262921688236688,   lng: 123.72262438330911, link: "14.html" }
+];
+
+    barangays.forEach(function(b) {
+  L.marker([b.lat, b.lng], { icon: arrowIcon }).addTo(map)
+    .bindPopup('<a href="' + b.link + '" target="_self">' + b.name + '</a>');
+});
+
+  </script>
+    <script>
+      $(document).ready(function () {
+        // Show the exit confirmation popup
+        $(document).on("click", "#exitConfirmButton", function () {
+          $("#popupCloseRight").css("display", "flex"); // Show the popup
+        });
+  
+        // Close the exit confirmation popup
+        $(document).on("click", "#closePopup", function () {
+          $("#popupCloseRight").css("display", "none"); // Hide the popup
+        });
+  
+        // Exit and redirect to a blank page
+        document.getElementById("exitButton").addEventListener("click", function () {
+          window.location.href = "about:blank"; // Redirect to blank page
+        });
+      });
+    </script>
+</body>
+</html>
